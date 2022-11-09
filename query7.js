@@ -7,15 +7,15 @@ let num_month_mapper = function () {
     emit(this.MOB, count);
 };
 
-let num_month_reducer = function (keyMOB, userIds) {
-    return Array.sum(userIds);
+let num_month_reducer = function (keyMOB, count) {
+    return Array.sum(count);
 };
 
-let num_month_finalizer = function (keyMOB, numUserIds) {
+let num_month_finalizer = function (keyMOB, count) {
     // We've implemented a simple forwarding finalize function. This implementation
     // is naive: it just forwards the reduceVal to the output collection.
     // TODO: Feel free to change it if needed.
-    return numUserIds;
+    return count;
 };
 
 db.users.mapReduce( num_month_mapper,
