@@ -3,12 +3,12 @@
 
 let num_month_mapper = function () {
     // TODO: Implement the map function
-    emit(this.MOB, this.user_id);
+    var count = 1;
+    emit(this.MOB, count);
 };
 
 let num_month_reducer = function (keyMOB, userIds) {
-    // TODO: Implement the reduce function
-    return userIds.length;
+    return Array.sum(userIds);
 };
 
 let num_month_finalizer = function (keyMOB, numUserIds) {
