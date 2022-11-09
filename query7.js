@@ -17,11 +17,3 @@ let num_month_finalizer = function (keyMOB, count) {
     // TODO: Feel free to change it if needed.
     return count;
 };
-
-db.users.mapReduce( num_month_mapper,
-    num_month_reducer,
-    {
-      out: "born_each_month",
-      finalize: num_month_finalizer
-    }
-  );

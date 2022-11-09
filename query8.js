@@ -23,16 +23,6 @@ let city_average_friendcount_finalizer = function (hometownCity, reducedVal) {
     // We've implemented a simple forwarding finalize function. This implementation
     // is naive: it just forwards the reduceVal to the output collection.
     // TODO: Feel free to change it if needed.
-    
-    reducedVal.avg = reducedVal.numFriends / reducedVal.count;
 
-    return reducedVal;
+    return reducedVal.numFriends / reducedVal.count;
 };
-
-db.users.mapReduce( city_average_friendcount_mapper,
-    city_average_friendcount_reducer,
-    {
-      out: "friend_city_population",
-      finalize: city_average_friendcount_finalizer
-    }
-);
