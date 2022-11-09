@@ -9,8 +9,8 @@ import org.json.JSONArray;
 public class Main {
 
     static String dataType = "PUBLIC";
-    static String oracleUserName = "uniqname"; // replace with your Oracle account name
-    static String password = "password"; // replace with your Oracle password
+    static String oracleUserName = "rmariana"; // replace with your Oracle account name
+    static String password = "$qlroks"; // replace with your Oracle password
 
     public static void main(String[] args) {
 

@@ -55,35 +55,23 @@ public class GetData {
 
             // Convert to JSON
             while (rst.next()) {
-                long userid = rst.getLong(0);
-                String firstName = rst.getString(1);
-                String lastName = rst.getString(2);
-                int yob = rst.getInt(3);
-                int mob = rst.getInt(4);
-                int dob = rst.getInt(5);
-                String gender = rst.getString(6);
+                long userid = rst.getLong(1);
+                String firstName = rst.getString(2);
+                String lastName = rst.getString(3);
+                int yob = rst.getInt(4);
+                int mob = rst.getInt(5);
+                int dob = rst.getInt(6);
+                String gender = rst.getString(7);
 
                 JSONObject user = new JSONObject();
 
                 user.put("MOB", mob);
-                user.put("hometown", new JSONObject({}));
-                user.put("current", new JSONObject({}));
-                user.put("gender", gender);
-                user.put("user_id", userid);
-                user.put("DOB", dob);
-                user.put("last_name", lastName);
-                user.put("first_name", firstName);
-                user.put("YOB", yob);
-                user.put("friends", new JSONArray([]));
 
-                users_info.put(user);
-            }
-
-            for (int i = 0; i < users_info.length; i++) {
-                int userid = users_info.getJSONObject(i).getInt("user_id");
-
-                // Get hometown info
-                rst = stmt.executeQuery(
+                // Make second statement for finding hometown, current, and friends
+                // **** HOMETOWN
+                JSONObject hometownInfo = new JSONObject();
+                Statement stmt2 = oracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                ResultSet rst2 = stmt2.executeQuery(
                     "SELECT C.CITY_NAME, C.STATE_NAME, C.COUNTRY_NAME " +
                     "FROM " + hometownCityTableName + " HC " +
                     "LEFT JOIN " + cityTableName + " C " +
@@ -91,51 +79,63 @@ public class GetData {
                     "WHERE HC.USER_ID = " + userid
                 );
 
-                while (rst.next()) {
-                    String cityName = rst.getString(0);
-                    String stateName = rst.getString(1);
-                    String countryName = rst.getString(2);
+                while (rst2.next()) {
+                    String cityName = rst2.getString(1);
+                    String stateName = rst2.getString(2);
+                    String countryName = rst2.getString(3);
 
-                    JSONObject hometownInfo = new JSONObject();
                     hometownInfo.put("country", countryName);
                     hometownInfo.put("city", cityName);
                     hometownInfo.put("state", stateName);
-
-                    // Set hometown to hometownInfo
-                    rst = stmt.executeQuery(
-                        "SELECT USER2_ID " +
-                        "FROM " + friendsTableName + " " +
-                        "WHERE USER1_ID = " + userid
-                    );
-
-                    JSONArray friends = new JSONArray();
-                    while (rst.next()) {
-                        Long user2id = rst.getLong(0);
-                        friends.add(user2id);
-                    }
                 }
+                user.put("hometown", hometownInfo);
 
-                // Get current city info
-                rst = stmt.executeQuery(
+                // **** CURRENT
+                JSONObject currentInfo = new JSONObject();
+                rst2 = stmt2.executeQuery(
                     "SELECT C.CITY_NAME, C.STATE_NAME, C.COUNTRY_NAME " +
                     "FROM " + currentCityTableName + " CC " +
                     "LEFT JOIN " + cityTableName + " C " +
-                    "ON CC.HOMETOWN_CITY_ID = C.CITY_ID " +
+                    "ON CC.CURRENT_CITY_ID = C.CITY_ID " +
                     "WHERE CC.USER_ID = " + userid
                 );
 
-                while (rst.next()) {
-                    String cityName = rst.getString(0);
-                    String stateName = rst.getString(1);
-                    String countryName = rst.getString(2);
+                while (rst2.next()) {
+                    String cityName = rst2.getString(1);
+                    String stateName = rst2.getString(2);
+                    String countryName = rst2.getString(3);
 
-                    JSONObject currentInfo = new JSONObject();
                     currentInfo.put("country", countryName);
                     currentInfo.put("city", cityName);
                     currentInfo.put("state", stateName);
                 }
+                user.put("current", currentInfo);
 
-                // Get friends
+                user.put("gender", gender);
+                user.put("user_id", userid);
+                user.put("DOB", dob);
+                user.put("last_name", lastName);
+                user.put("first_name", firstName);
+                user.put("YOB", yob);
+
+                // **** FRIENDS
+                JSONArray friendsInfo = new JSONArray();
+                rst2 = stmt2.executeQuery(
+                    "SELECT USER2_ID " +
+                    "FROM " + friendsTableName + " " +
+                    "WHERE USER1_ID = " + userid
+                );
+
+                while (rst2.next()) {
+                    long user2id = rst2.getLong(1);
+                    friendsInfo.put(user2id);
+                }
+                user.put("friends", friendsInfo);
+
+                // Add current user to users info
+                users_info.put(user);
+
+                stmt2.close();
             }
             
             stmt.close();
